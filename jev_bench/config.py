@@ -1,7 +1,7 @@
 import os
 import platform
 
-TYPESAFE_API_KEY = os.environ.get("TYPESAFE_API_KEY", "")
+TYPESAFE_API_KEY = os.environ.get("TYPESAFE_API_KEY", "") or os.environ.get("JEV_API_KEY", "")
 TYPESAFE_BASE_URL = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai/v1/systemone")
 TYPESAFE_MODEL = os.environ.get("TYPESAFE_MODEL", "jev-latest")
 

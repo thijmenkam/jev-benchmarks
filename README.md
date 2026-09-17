@@ -22,7 +22,7 @@ pip install typesafe-sdk system-one-adapter
 
 | Key | Purpose |
 | --- | --- |
-| `TYPESAFE_API_KEY` | Jev queries through the TypeSafe API (`POST https://api.typesafe.ai/v1/systemone`). |
+| `TYPESAFE_API_KEY` | Jev queries through the TypeSafe API (`POST https://api.typesafe.ai/v1/systemone`). `JEV_API_KEY` is accepted as a fallback when `TYPESAFE_API_KEY` is unset. |
 | `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | Reference LLM through an OpenAI-compatible endpoint (defaults to OpenRouter). |
 | `LLM_MODELS` | Space-separated model ids for the reference LLM(s). Default: `openai/gpt-5-mini anthropic/claude-sonnet-4.5`. |
 | `LLM_BASE_URL` | Override the OpenAI-compatible endpoint (default `https://openrouter.ai/api/v1`). |
@@ -30,10 +30,12 @@ pip install typesafe-sdk system-one-adapter
 
 Without keys the harness runs in **dry/mocked mode**: Jev and the reference LLM are replaced by deterministic mock models so the full pipeline (collection → metrics → report) still runs end to end. Mock output is clearly labeled and must not be read as real measurements.
 
+With a Jev key but no LLM key, the harness runs **Jev-only**: the LLM axis is excluded (no synthetic numbers) and the report states it as pending. Mock LLMs only appear when the whole run is mocked (dry mode, or no Jev key).
+
 ## Run
 
 ```bash
-python run_benchmark.py --mode auto            # real APIs when keys are present, else mocked
+python run_benchmark.py --mode auto            # real APIs when keys are present; Jev-only if only the Jev key is set
 python run_benchmark.py --mode dry             # force mocked models
 python run_benchmark.py --tasks support_routing,churn_likelihood
 ```

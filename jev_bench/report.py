@@ -39,8 +39,12 @@ def build_report(meta, tasks, models, rows, out_dir):
     lines.append("")
     real_jev = meta.get("real_jev")
     real_llm = meta.get("real_llm")
+    if real_jev and not real_llm:
+        llm_status = "not evaluated (no API key)"
+    else:
+        llm_status = "yes (real API)" if real_llm else "NO (mock)"
     lines.append("Live model access: Jev %s · LLM %s" % (
-        "yes (real API)" if real_jev else "NO (mock)", "yes (real API)" if real_llm else "NO (mock)"))
+        "yes (real API)" if real_jev else "NO (mock)", llm_status))
     lines.append("")
 
     lines.append("### Overall metrics")
@@ -96,7 +100,12 @@ def build_report(meta, tasks, models, rows, out_dir):
     lines.append("### Caveats")
     lines.append("")
     lines.append("- LLM results use the System-One-style wrapper over an OpenAI-compatible endpoint (single structured JSON, corrective retries, normalized probabilities) — the fairest structured-decision wrapper we know of, but still not identical to the native TypeSafe parallel sampler.")
-    lines.append("- This run used mocked model responses (no API keys present); live runs require `TYPESAFE_API_KEY` and `OPENROUTER_API_KEY` / `OPENAI_API_KEY`. Mock latency/cost/token figures are synthetic.")
+    if real_jev and real_llm:
+        lines.append("- This run used live responses from both Jev and the reference LLM(s).")
+    elif real_jev:
+        lines.append("- This run used live responses from Jev only. No OpenRouter/OpenAI key was available, so the LLM axis is pending — no LLM numbers (live or mocked) are included here.")
+    else:
+        lines.append("- This run used mocked model responses (no API keys present); live runs require `TYPESAFE_API_KEY` (or `JEV_API_KEY`) and `OPENROUTER_API_KEY` / `OPENAI_API_KEY`. Mock latency/cost/token figures are synthetic.")
     lines.append("- Sample sizes are small; treat numbers as indicative, not definitive.")
     lines.append("")
 

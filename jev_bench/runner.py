@@ -13,8 +13,10 @@ RESULTS_DIR = os.path.join(REPO_ROOT, "results")
 
 def build_models(mode="auto"):
     dry = mode == "dry"
+    jev_real = config.has_jev_key() and not dry
+    llm_real = config.has_llm_key() and not dry
     models = []
-    if config.has_jev_key() and not dry:
+    if jev_real:
         models.append({"key": "jev", "name": "jev (typesafe)", "client": TypeSafeClient(), "real": True})
     else:
         models.append({
@@ -24,7 +26,7 @@ def build_models(mode="auto"):
             "real": False,
         })
     llm_models = config.LLM_MODELS or ["openai/gpt-5-mini"]
-    if config.has_llm_key() and not dry:
+    if llm_real:
         for model_id in llm_models:
             models.append({
                 "key": "llm",
@@ -32,7 +34,7 @@ def build_models(mode="auto"):
                 "client": LLMAdapterClient(model=model_id),
                 "real": True,
             })
-    else:
+    elif not jev_real:
         for i, model_id in enumerate(llm_models):
             short = model_id.rsplit("/", 1)[-1]
             models.append({
