@@ -1,0 +1,199 @@
+{
+  "id": "support_routing",
+  "name": "Support ticket routing",
+  "description": "Route a customer support message to the right team and flag urgency. Labeled with the correct department and whether the message is urgent.",
+  "primary_question": "department",
+  "questions": {
+    "department": {
+      "type": "choice",
+      "instructions": "Which team should handle this support ticket?",
+      "criteria": {
+        "billing": "Payments, invoices, refunds, charges",
+        "technical": "Bugs, outages, integrations, product errors",
+        "account": "Login, account access, plan changes",
+        "sales": "New features, pricing, purchasing",
+        "other": "Anything that fits none of the above"
+      }
+    },
+    "urgency": {
+      "type": "noul",
+      "instructions": "The message conveys urgency or time-sensitivity."
+    }
+  },
+  "samples": [
+    {
+      "id": "routing_001",
+      "state": {
+        "ticket": {
+          "subject": "Charged twice for the enterprise plan",
+          "messages": [
+            {"from": "customer", "text": "I see two charges of $449 on my card this month for the same enterprise plan. Please refund the duplicate right away. Monthly invoice #INV-2034 attached."}
+          ]
+        },
+        "customer": {"plan": "enterprise", "region": "us"}
+      },
+      "label": {"department": "billing", "urgency": true}
+    },
+    {
+      "id": "routing_002",
+      "state": {
+        "ticket": {
+          "subject": "Login flow broken after update",
+          "messages": [
+            {"from": "customer", "text": "Since the latest release I get a 500 error whenever I try to sign in with SSO. This blocks all of our users."}
+          ]
+        },
+        "customer": {"plan": "team", "region": "eu"}
+      },
+      "label": {"department": "technical", "urgency": true}
+    },
+    {
+      "id": "routing_003",
+      "state": {
+        "ticket": {
+          "subject": "How much would unlimited seats cost",
+          "messages": [
+            {"from": "customer", "text": "We are evaluating adding 120 seats next quarter. Could you send a quote for annual billing?"}
+          ]
+        },
+        "customer": {"plan": "starter", "region": "us"}
+      },
+      "label": {"department": "sales", "urgency": false}
+    },
+    {
+      "id": "routing_004",
+      "state": {
+        "ticket": {
+          "subject": "Can I change my company name on the invoice",
+          "messages": [
+            {"from": "customer", "text": "Our legal entity changed. How do I update the billing name shown on my invoices?"}
+          ]
+        },
+        "customer": {"plan": "pro", "region": "us"}
+      },
+      "label": {"department": "account", "urgency": false}
+    },
+    {
+      "id": "routing_005",
+      "state": {
+        "ticket": {
+          "subject": "Refund policy question after failed trial",
+          "messages": [
+            {"from": "customer", "text": "My team tested the product for 30 days but we decided not to continue, and I was still charged $99. I would like a full refund."}
+          ]
+        },
+        "customer": {"plan": "trial", "region": "de"}
+      },
+      "label": {"department": "billing", "urgency": false}
+    },
+    {
+      "id": "routing_006",
+      "state": {
+        "ticket": {
+          "subject": "Webhook callbacks silently dropped",
+          "messages": [
+            {"from": "customer", "text": "Our webhooks fired but your side did not deliver them for about 40 minutes last night. We missed several order events. This is urgent for our pipeline."}
+          ]
+        },
+        "customer": {"plan": "enterprise", "region": "us"}
+      },
+      "label": {"department": "technical", "urgency": true}
+    },
+    {
+      "id": "routing_007",
+      "state": {
+        "ticket": {
+          "subject": "Discount for non-profit",
+          "messages": [
+            {"from": "customer", "text": "We are a registered non-profit. Do you offer pricing discounts, and if so who should we talk to about applying?"}
+          ]
+        },
+        "customer": {"plan": "free", "region": "nl"}
+      },
+      "label": {"department": "sales", "urgency": false}
+    },
+    {
+      "id": "routing_008",
+      "state": {
+        "ticket": {
+          "subject": "Accidentally deleted my workspace",
+          "messages": [
+            {"from": "customer", "text": "I deleted our main workspace by mistake. Can you restore it from backups as soon as possible? Members cannot access anything."}
+          ]
+        },
+        "customer": {"plan": "team", "region": "us"}
+      },
+      "label": {"department": "account", "urgency": true}
+    },
+    {
+      "id": "routing_009",
+      "state": {
+        "ticket": {
+          "subject": "Export limits on the API",
+          "messages": [
+            {"from": "customer", "text": "The API stops returning records at offset 10,000. Is that a hard limit and does the higher plan raise it?"}
+          ]
+        },
+        "customer": {"plan": "pro", "region": "gb"}
+      },
+      "label": {"department": "technical", "urgency": false}
+    },
+    {
+      "id": "routing_010",
+      "state": {
+        "ticket": {
+          "subject": "No reply to my purchase order",
+          "messages": [
+            {"from": "customer", "text": "I emailed a signed purchase order three days ago and have not heard back. Has billing received it?"}
+          ]
+        },
+        "customer": {"plan": "trial", "region": "fr"}
+      },
+      "label": {"department": "sales", "urgency": false}
+    },
+    {
+      "id": "routing_011",
+      "state": {
+        "ticket": {
+          "subject": "Invoice shows wrong VAT",
+          "messages": [
+            {"from": "customer", "text": "My invoice shows 21% VAT but we are an exporting business and should be zero-rated. Please re-issue the invoice."}
+          ]
+        },
+        "customer": {"plan": "pro", "region": "nl"}
+      },
+      "label": {"department": "billing", "urgency": false}
+    },
+    {
+      "id": "routing_012",
+      "state": "Our CI builds started failing when the new SDK version removed the retry option. There is no workaround and our releases are stalled. Please fix asap.",
+      "label": {"department": "technical", "urgency": true}
+    },
+    {
+      "id": "routing_013",
+      "state": {
+        "ticket": {
+          "subject": "Where do I find my API keys",
+          "messages": [
+            {"from": "customer", "text": "I am looking for where to generate an API key for our integration but cannot find it in the dashboard."}
+          ]
+        },
+        "customer": {"plan": "starter", "region": "us"}
+      },
+      "label": {"department": "account", "urgency": false}
+    },
+    {
+      "id": "routing_014",
+      "state": {
+        "ticket": {
+          "subject": "Complaint about chat hold time",
+          "messages": [
+            {"from": "customer", "text": "I have been on hold with your support chat for an hour and nobody is answering. This is unacceptable."}
+          ]
+        },
+        "customer": {"plan": "enterprise", "region": "us"}
+      },
+      "label": {"department": "other", "urgency": true}
+    }
+  ]
+}

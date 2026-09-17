@@ -1,0 +1,31 @@
+{
+  "run_id": "20260917T183908Z",
+  "mode": "dry",
+  "real_jev": false,
+  "real_llm": false,
+  "repeat": 3,
+  "models": [
+    {
+      "name": "jev (mock)",
+      "provider": "mock",
+      "real": false
+    },
+    {
+      "name": "gpt-5-mini (mock)",
+      "provider": "mock",
+      "real": false
+    },
+    {
+      "name": "claude-sonnet-4.5 (mock)",
+      "provider": "mock",
+      "real": false
+    }
+  ],
+  "tasks": [
+    "churn_likelihood",
+    "content_moderation",
+    "field_extraction",
+    "support_routing"
+  ],
+  "created_at": "20260917T183908Z"
+}

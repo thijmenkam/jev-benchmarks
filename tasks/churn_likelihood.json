@@ -1,0 +1,189 @@
+{
+  "id": "churn_likelihood",
+  "name": "Customer churn likelihood",
+  "description": "Score how likely a customer account is to churn on a five-level rubric. Labeled with the true risk level (0 = very low, 4 = very high).",
+  "primary_question": "churn_risk",
+  "questions": {
+    "churn_risk": {
+      "type": "score",
+      "instructions": "How likely is this customer to churn in the next 90 days?",
+      "criteria": [
+        "Very low risk: actively engaged, renewing, healthy usage",
+        "Low risk: engaged but with minor warning signs",
+        "Medium risk: noticeable decline in usage or satisfaction",
+        "High risk: strong signals of churn intent",
+        "Very high risk: already trying to leave"
+      ]
+    }
+  },
+  "samples": [
+    {
+      "id": "churn_001",
+      "state": {
+        "customer": {"plan": "enterprise", "account_age_days": 720, "seats": 40},
+        "signals": {
+          "usage_change_30d": -4.0,
+          "support_tickets_30d": 0,
+          "renewal_seats_change": "+2",
+          "sentiment": "consistently positive, references growth plans",
+          "payment": "annual, paid in full"
+        }
+      },
+      "label": {"churn_risk": 0}
+    },
+    {
+      "id": "churn_002",
+      "state": {
+        "customer": {"plan": "pro", "account_age_days": 210, "seats": 8},
+        "signals": {
+          "usage_change_30d": -12.0,
+          "support_tickets_30d": 1,
+          "renewal_seats_change": "-1",
+          "sentiment": "neutral, answered CSAT with 6/10",
+          "payment": "monthly"
+        }
+      },
+      "label": {"churn_risk": 2}
+    },
+    {
+      "id": "churn_003",
+      "state": {
+        "customer": {"plan": "team", "account_age_days": 95, "seats": 5},
+        "signals": {
+          "usage_change_30d": -58.0,
+          "support_tickets_30d": 0,
+          "renewal_seats_change": "n/a - month-to-month",
+          "sentiment": "asked about export of all data twice",
+          "payment": "monthly, one declined attempt"
+        }
+      },
+      "label": {"churn_risk": 4}
+    },
+    {
+      "id": "churn_004",
+      "state": {
+        "customer": {"plan": "starter", "account_age_days": 30, "seats": 1},
+        "signals": {
+          "usage_change_30d": 5.0,
+          "support_tickets_30d": 3,
+          "renewal_seats_change": "+0",
+          "sentiment": "frustrated but wants help, tickets about long setup",
+          "payment": "trial converted to paid"
+        }
+      },
+      "label": {"churn_risk": 2}
+    },
+    {
+      "id": "churn_005",
+      "state": {
+        "customer": {"plan": "enterprise", "account_age_days": 1500, "seats": 120},
+        "signals": {
+          "usage_change_30d": -2.0,
+          "support_tickets_30d": 0,
+          "renewal_seats_change": "+10",
+          "sentiment": "executive sponsor very positive, expansion talks",
+          "payment": "annual, auto-renew on"
+        }
+      },
+      "label": {"churn_risk": 0}
+    },
+    {
+      "id": "churn_006",
+      "state": {
+        "customer": {"plan": "pro", "account_age_days": 400, "seats": 12},
+        "signals": {
+          "usage_change_30d": -35.0,
+          "support_tickets_30d": 2,
+          "renewal_seats_change": "-6",
+          "sentiment": "complaints about missing features, compared us to competitor in email",
+          "payment": "annual, renewal in 45 days"
+        }
+      },
+      "label": {"churn_risk": 3}
+    },
+    {
+      "id": "churn_007",
+      "state": {
+        "customer": {"plan": "free", "account_age_days": 60, "seats": 1},
+        "signals": {
+          "usage_change_30d": -80.0,
+          "support_tickets_30d": 0,
+          "renewal_seats_change": "n/a",
+          "sentiment": "no engagement, last login 25 days ago",
+          "payment": "free tier"
+        }
+      },
+      "label": {"churn_risk": 3}
+    },
+    {
+      "id": "churn_008",
+      "state": {
+        "customer": {"plan": "team", "account_age_days": 180, "seats": 6},
+        "signals": {
+          "usage_change_30d": 8.0,
+          "support_tickets_30d": 1,
+          "renewal_seats_change": "+1",
+          "sentiment": "satisfied, asked about onboarding best practices",
+          "payment": "monthly"
+        }
+      },
+      "label": {"churn_risk": 1}
+    },
+    {
+      "id": "churn_009",
+      "state": {
+        "customer": {"plan": "enterprise", "account_age_days": 800, "seats": 60},
+        "signals": {
+          "usage_change_30d": -22.0,
+          "support_tickets_30d": 4,
+          "renewal_seats_change": "-10",
+          "sentiment": "openly shopping alternatives, requested a sales call to discuss exit plan",
+          "payment": "annual, renewal in 90 days"
+        }
+      },
+      "label": {"churn_risk": 4}
+    },
+    {
+      "id": "churn_010",
+      "state": {
+        "customer": {"plan": "pro", "account_age_days": 320, "seats": 9},
+        "signals": {
+          "usage_change_30d": 15.0,
+          "support_tickets_30d": 0,
+          "renewal_seats_change": "+3",
+          "sentiment": "positive, shared a success story in the community",
+          "payment": "annual, 6 months remaining"
+        }
+      },
+      "label": {"churn_risk": 0}
+    },
+    {
+      "id": "churn_011",
+      "state": {
+        "customer": {"plan": "starter", "account_age_days": 15, "seats": 1},
+        "signals": {
+          "usage_change_30d": -90.0,
+          "support_tickets_30d": 0,
+          "renewal_seats_change": "n/a",
+          "sentiment": "never logged in after signup, onboarding email unread",
+          "payment": "credit card trial"
+        }
+      },
+      "label": {"churn_risk": 4}
+    },
+    {
+      "id": "churn_012",
+      "state": {
+        "customer": {"plan": "team", "account_age_days": 240, "seats": 7},
+        "signals": {
+          "usage_change_30d": -6.0,
+          "support_tickets_30d": 2,
+          "renewal_seats_change": "+0",
+          "sentiment": "mildly positive, one support issue was slow to resolve",
+          "payment": "monthly"
+        }
+      },
+      "label": {"churn_risk": 1}
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "id": "field_extraction",
+  "name": "Field / entity extraction",
+  "description": "Extract structured fields from an order email: which product line it concerns and whether a promo/voucher code is present. Labeled with the true values.",
+  "primary_question": "product_category",
+  "questions": {
+    "product_category": {
+      "type": "choice",
+      "instructions": "Which product line does this message concern?",
+      "criteria": {
+        "hardware": "Physical devices sold by the company",
+        "software_subscription": "Cloud software subscription or license",
+        "professional_service": "Consulting, implementation, or support services",
+        "other": "Cannot be determined or fits no product line"
+      }
+    },
+    "has_promo_code": {
+      "type": "noul",
+      "instructions": "The message contains a promo, discount, or voucher code.",
+      "criteria": {
+        "true": "A code like PROMO20, SAVE-10, or similar is present",
+        "false": "No code is present"
+      }
+    }
+  },
+  "samples": [
+    {
+      "id": "extract_001",
+      "state": {
+        "email": {
+          "subject": "Order 88231 confirmed",
+          "body": "Thank you for your order. Your 4TB external drive ships in 2 business days. Order total: $189.99."
+        }
+      },
+      "label": {"product_category": "hardware", "has_promo_code": false}
+    },
+    {
+      "id": "extract_002",
+      "state": {
+        "email": {
+          "subject": "Your subscription is renewing",
+          "body": "Your Analytics Pro subscription renews on June 1 for $29/month. Manage billing in your account settings."
+        }
+      },
+      "label": {"product_category": "software_subscription", "has_promo_code": false}
+    },
+    {
+      "id": "extract_003",
+      "state": {
+        "email": {
+          "subject": "Consulting engagement kickoff",
+          "body": "Our team will start the implementation workshop on Monday. Fee for the 2-week engagement: $12,000."
+        }
+      },
+      "label": {"product_category": "professional_service", "has_promo_code": false}
+    },
+    {
+      "id": "extract_004",
+      "state": {
+        "email": {
+          "subject": "20% off your next hardware order",
+          "body": "Use code HWSAVE20 at checkout to get 20% off any device purchase this month."
+        }
+      },
+      "label": {"product_category": "hardware", "has_promo_code": true}
+    },
+    {
+      "id": "extract_005",
+      "state": {
+        "email": {
+          "subject": "Welcome to CloudSuite Basic",
+          "body": "Your CloudSuite Basic account is active. Apply promo code CLOUD10 within 30 days for one month free."
+        }
+      },
+      "label": {"product_category": "software_subscription", "has_promo_code": true}
+    },
+    {
+      "id": "extract_006",
+      "state": {
+        "email": {
+          "subject": "Onboarding session booked",
+          "body": "Thanks for choosing our onboarding package. Your consultant will call you Thursday at 10:00. Package value: $2,500."
+        }
+      },
+      "label": {"product_category": "professional_service", "has_promo_code": false}
+    },
+    {
+      "id": "extract_007",
+      "state": {
+        "email": {
+          "subject": "Return request",
+          "body": "I want to return the noise-cancelling headphones I bought last week. The order number is #88114. Please send a prepaid label."
+        }
+      },
+      "label": {"product_category": "hardware", "has_promo_code": false}
+    },
+    {
+      "id": "extract_008",
+      "state": {
+        "email": {
+          "subject": "Trial added to your account",
+          "body": "Enjoy a free 14-day Pro trial of our platform. No code needed."
+        }
+      },
+      "label": {"product_category": "software_subscription", "has_promo_code": false}
+    },
+    {
+      "id": "extract_009",
+      "state": {
+        "email": {
+          "subject": "Renewal discount for services",
+          "body": "Renew your annual support-retainer before March 1 with code SERVE25 to save 25% on the retainer fee."
+        }
+      },
+      "label": {"product_category": "professional_service", "has_promo_code": true}
+    },
+    {
+      "id": "extract_010",
+      "state": {
+        "email": {
+          "subject": "Order shipped",
+          "body": "Your order of 2 mechanical keyboards shipped from our warehouse today. Tracking: 1Z999AA10123456784."
+        }
+      },
+      "label": {"product_category": "hardware", "has_promo_code": false}
+    },
+    {
+      "id": "extract_011",
+      "state": {
+        "email": {
+          "subject": "Thank you for your upgrade",
+          "body": "Your upgrade to the annual Business tier is confirmed. You saved 15% with the annual plan."
+        }
+      },
+      "label": {"product_category": "software_subscription", "has_promo_code": false}
+    },
+    {
+      "id": "extract_012",
+      "state": {
+        "email": {
+          "subject": "Consulting estimate attached",
+          "body": "Attached is the estimate for the data-migration engagement, total $18,400. Use code MIGRATE5 to confirm and save 5%."
+        }
+      },
+      "label": {"product_category": "professional_service", "has_promo_code": true}
+    }
+  ]
+}

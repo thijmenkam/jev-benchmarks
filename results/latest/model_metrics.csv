@@ -1,0 +1,4 @@
+model,n_calls,accuracy,brier,ece,consistency,prob_stability,type_validity,latency_p50_ms,latency_p95_ms,latency_mean_ms,cost_usd_total,cost_usd_per_1k,tokens_in,tokens_out
+jev (mock),150,0.9342,0.1043,0.1344,1.0000,0.0000,1.0000,154.251,254.850,160.617,0.001062,0.007080,25287,33000
+gpt-5-mini (mock),150,0.9474,0.1100,0.1541,0.7273,0.0787,0.9467,1687.692,3022.850,1819.955,0.361609,2.410725,25287,33000
+claude-sonnet-4.5 (mock),150,0.9386,0.1120,0.1501,0.7500,0.0707,0.9400,2300.174,3819.861,2481.566,0.570861,3.805740,25287,33000

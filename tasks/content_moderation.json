@@ -1,0 +1,88 @@
+{
+  "id": "content_moderation",
+  "name": "Content moderation decision",
+  "description": "Decide whether a piece of user content should be blocked and rate its severity. Labeled with the correct block decision.",
+  "primary_question": "should_block",
+  "questions": {
+    "should_block": {
+      "type": "noul",
+      "instructions": "This content should be blocked.",
+      "criteria": {
+        "true": "Clear policy violation: hate speech, harassment, dangerous or illegal content",
+        "false": "Acceptable content, possibly with minor issues"
+      }
+    },
+    "severity": {
+      "type": "score",
+      "instructions": "How severe is the policy concern in this content?",
+      "criteria": [
+        "No concern",
+        "Minor concern, borderline",
+        "Clear violation",
+        "Severe violation"
+      ]
+    }
+  },
+  "samples": [
+    {
+      "id": "mod_001",
+      "state": "I know the algorithm keeps hiding my posts lately. Kinda frustrating, any tips?",
+      "label": {"should_block": false}
+    },
+    {
+      "id": "mod_002",
+      "state": "You are worthless and everyone who supports you deserves to burn. Kill yourself.",
+      "label": {"should_block": true}
+    },
+    {
+      "id": "mod_003",
+      "state": "Check out my new recipe for garlic bread, it's the best on the internet!! https://example.com/garlic-bread",
+      "label": {"should_block": false}
+    },
+    {
+      "id": "mod_004",
+      "state": "Buy this miracle cure today, government doesn't want you to know: cash-app me now and see results guaranteed.",
+      "label": {"should_block": true}
+    },
+    {
+      "id": "mod_005",
+      "state": "Does anyone else think the new update changed the color palette? Am I the only one who sees this?",
+      "label": {"should_block": false}
+    },
+    {
+      "id": "mod_006",
+      "state": "I will find you and make sure you never post here again, you absolute scum.",
+      "label": {"should_block": true}
+    },
+    {
+      "id": "mod_007",
+      "state": "Here is a full tutorial with screenshots for how to bypass the payment on every course in our catalog.",
+      "label": {"should_block": true}
+    },
+    {
+      "id": "mod_008",
+      "state": "Thanks for the warm welcome everyone, happy to join this community!",
+      "label": {"should_block": false}
+    },
+    {
+      "id": "mod_009",
+      "state": "You're all idiots. People like you are the reason this platform is dying. Good riddance.",
+      "label": {"should_block": true}
+    },
+    {
+      "id": "mod_010",
+      "state": "Can someone share the link to the weekend event? I lost the original post.",
+      "label": {"should_block": false}
+    },
+    {
+      "id": "mod_011",
+      "state": "DM me your credit card number and I will 'verify' your account for you right now, no questions asked.",
+      "label": {"should_block": true}
+    },
+    {
+      "id": "mod_012",
+      "state": "My username change is not syncing across devices, is this a known issue?",
+      "label": {"should_block": false}
+    }
+  ]
+}
