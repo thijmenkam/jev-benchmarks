@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 
@@ -13,6 +14,9 @@ LLM_MODELS = [
     for m in os.environ.get("LLM_MODELS", "openai/gpt-5-mini anthropic/claude-sonnet-4.5").split()
     if m.strip()
 ]
+LLM_USER_AGENT = os.environ.get("LLM_USER_AGENT", "jev-benchmarks/0.1")
+LLM_EXTRA_HEADERS = json.loads(os.environ.get("LLM_EXTRA_HEADERS", "{}"))
+LLM_STRUCTURED_OUTPUTS = os.environ.get("LLM_STRUCTURED_OUTPUTS", "json_schema").strip().lower()
 
 PRICE_PER_MT_IN_USD = float(os.environ.get("PRICE_PER_MT_IN_USD", "0.0"))
 PRICE_PER_MT_OUT_USD = float(os.environ.get("PRICE_PER_MT_OUT_USD", "0.0"))

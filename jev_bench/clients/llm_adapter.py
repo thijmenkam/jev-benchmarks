@@ -13,6 +13,12 @@ APPROX_PRICE_USD_PER_MT = {
     "anthropic/claude-sonnet-4.5": (3.0, 15.0),
     "anthropic/claude-opus-4.1": (15.0, 75.0),
     "google/gemini-2.5-pro": (1.25, 10.0),
+    "deepseek-v4-pro": (0.66, 1.98),
+    "deepseek-v4-flash": (0.15, 0.60),
+    "kimi-k3": (3.0, 15.0),
+    "kimi-k2.7-code": (0.95, 4.0),
+    "longcat-2.0": (0.30, 1.20),
+    "hy3": (0.14, 0.58),
 }
 
 N_OPTION_MARKER = "__n__"
@@ -126,7 +132,7 @@ class LLMAdapterClient:
         model,
         base_url=None,
         api_key=None,
-        structured_outputs=True,
+        structured_outputs=None,
         llm_answer_mode="probabilities",
         normalize_probabilities=True,
         n_retry_malformed_structure=1,
@@ -188,12 +194,17 @@ class LLMAdapterClient:
             if attempt:
                 total_retries += 1
             response_format = None
-            if self.structured_outputs:
+            mode = self.structured_outputs
+            if mode is None:
+                mode = config.LLM_STRUCTURED_OUTPUTS
+            if isinstance(mode, bool):
+                mode = "json_schema" if mode else "json_object"
+            if mode == "json_schema":
                 response_format = {
                     "type": "json_schema",
                     "json_schema": {"name": "system_one_answers", "schema": schema, "strict": True},
                 }
-            else:
+            elif mode == "json_object":
                 response_format = {"type": "json_object"}
             payload = {
                 "model": self.model,
@@ -204,7 +215,9 @@ class LLMAdapterClient:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
+                "User-Agent": config.LLM_USER_AGENT,
             }
+            headers.update(config.LLM_EXTRA_HEADERS)
             if self.model.startswith(("o1", "o3", "o4", "gpt-5")):
                 payload.pop("temperature", None)
             resp = requests.post(f"{self.base_url}/chat/completions", json=payload, headers=headers, timeout=self.timeout)

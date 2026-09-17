@@ -26,11 +26,30 @@ pip install typesafe-sdk system-one-adapter
 | `OPENROUTER_API_KEY` or `OPENAI_API_KEY` | Reference LLM through an OpenAI-compatible endpoint (defaults to OpenRouter). |
 | `LLM_MODELS` | Space-separated model ids for the reference LLM(s). Default: `openai/gpt-5-mini anthropic/claude-sonnet-4.5`. |
 | `LLM_BASE_URL` | Override the OpenAI-compatible endpoint (default `https://openrouter.ai/api/v1`). |
+| `LLM_USER_AGENT` | `User-Agent` header sent to the LLM endpoint (default `jev-benchmarks/0.1`). Some gateways require a non-generic UA. |
+| `LLM_EXTRA_HEADERS` | JSON object of extra HTTP headers for LLM calls (e.g. `{"x-opencode-session":"..."}`). |
+| `LLM_STRUCTURED_OUTPUTS` | Structured-output mode: `json_schema` (default), `json_object`, or `none`. Use `json_object` on endpoints that reject `json_schema`. |
 | `PRICE_PER_MT_IN_USD` / `PRICE_PER_MT_OUT_USD` | Override approximate pricing for your LLM model. |
 
 Without keys the harness runs in **dry/mocked mode**: Jev and the reference LLM are replaced by deterministic mock models so the full pipeline (collection → metrics → report) still runs end to end. Mock output is clearly labeled and must not be read as real measurements.
 
 With a Jev key but no LLM key, the harness runs **Jev-only**: the LLM axis is excluded (no synthetic numbers) and the report states it as pending. Mock LLMs only appear when the whole run is mocked (dry mode, or no Jev key).
+
+### Using an OpenCode Go subscription as the reference LLM
+
+The harness's OpenAI-compatible adapter works against OpenCode Go (`SUBSCRIBE` → `https://opencode.ai/zen/go/v1`) for every model that uses the `/chat/completions` protocol (GLM, Kimi, DeepSeek, LongCat, Hy, …). Go requires a non-generic `User-Agent` and a stable `x-opencode-session` header; `json_schema` responses are not supported there, so use `json_object`:
+
+```bash
+export OPENAI_API_KEY=<your opencode-go API key>   # from ~/.local/share/opencode/auth.json or the Zen console
+export LLM_BASE_URL=https://opencode.ai/zen/go/v1
+export LLM_MODELS="deepseek-v4-pro kimi-k3"
+export LLM_STRUCTURED_OUTPUTS=json_object
+export LLM_USER_AGENT=jev-benchmarks/0.1
+export LLM_EXTRA_HEADERS='{"x-opencode-session":"jev-bench-run-1"}'
+python run_benchmark.py --mode auto
+```
+
+Models served via Go's `/responses` endpoint (GPT 5.6 Luna, Grok 4.6) or `/messages` endpoint (Qwen, MiniMax) are not wired into this adapter yet.
 
 ## Run
 
