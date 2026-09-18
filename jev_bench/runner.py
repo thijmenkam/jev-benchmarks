@@ -31,7 +31,10 @@ def build_models(mode="auto"):
             models.append({
                 "key": "llm",
                 "name": model_id,
-                "client": LLMAdapterClient(model=model_id),
+                "client": LLMAdapterClient(
+                    model=model_id,
+                    protocol="responses" if model_id in config.LLM_RESPONSES_MODELS else "chat",
+                ),
                 "real": True,
             })
     elif not jev_real:

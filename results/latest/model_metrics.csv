@@ -1,2 +1,3 @@
 model,n_calls,accuracy,brier,ece,consistency,prob_stability,type_validity,latency_p50_ms,latency_p95_ms,latency_mean_ms,cost_usd_total,cost_usd_per_1k,tokens_in,tokens_out
-jev (typesafe),150,0.8816,0.0890,0.0682,1.0000,0.0061,1.0000,667.425,917.542,691.031,0.002836,0.018906,67521,7356
+jev (typesafe),150,0.8816,0.0887,0.0672,1.0000,0.0061,1.0000,626.722,701.044,643.986,0.002836,0.018906,67521,7356
+gpt-5.6-luna,150,0.8684,0.1133,0.0770,0.8864,0.0664,1.0000,2766.424,4051.790,2885.595,0.043847,0.292312,89478,21626

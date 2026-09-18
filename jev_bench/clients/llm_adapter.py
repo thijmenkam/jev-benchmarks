@@ -19,6 +19,8 @@ APPROX_PRICE_USD_PER_MT = {
     "kimi-k2.7-code": (0.95, 4.0),
     "longcat-2.0": (0.30, 1.20),
     "hy3": (0.14, 0.58),
+    "gpt-5.6-luna": (0.20, 1.20),
+    "grok-4.6": (2.0, 6.0),
 }
 
 N_OPTION_MARKER = "__n__"
@@ -34,6 +36,16 @@ def _price_for(model):
         if model == key or short == key_short:
             return price
     return config.DEFAULT_PRICE_IN_MT, config.DEFAULT_PRICE_OUT_MT
+
+
+def _responses_text(data):
+    parts = []
+    for item in data.get("output") or []:
+        if item.get("type") == "message":
+            for content in item.get("content") or []:
+                if content.get("type") == "output_text":
+                    parts.append(content.get("text", ""))
+    return "".join(parts)
 
 
 def build_system_prompt():
@@ -63,16 +75,18 @@ def build_schema(questions):
             answer = {
                 "type": "object",
                 "properties": {
-                    "type": {"const": "choice"},
-                    "choice": {"enum": options},
+                    "type": {"type": "string", "enum": ["choice"]},
+                    "choice": {"type": "string", "enum": options},
                     "probabilities": {
                         "type": "object",
-                        "propertyNames": {"enum": options},
-                        "additionalProperties": {"type": "number"},
+                        "description": "probability of each option; values must sum to 1",
+                        "properties": {opt: {"type": "number"} for opt in options},
+                        "required": options,
+                        "additionalProperties": False,
                     },
                     "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                 },
-                "required": ["choice", "probabilities", "confidence"],
+                "required": ["type", "choice", "probabilities", "confidence"],
                 "additionalProperties": False,
             }
         elif qtype == "score":
@@ -81,31 +95,35 @@ def build_schema(questions):
             answer = {
                 "type": "object",
                 "properties": {
-                    "type": {"const": "score"},
+                    "type": {"type": "string", "enum": ["score"]},
                     "score": {"type": "number", "minimum": 0},
                     "probabilities": {
                         "type": "object",
-                        "propertyNames": {"enum": level_keys},
-                        "additionalProperties": {"type": "number"},
+                        "description": "probability of each score level index; values must sum to 1",
+                        "properties": {k: {"type": "number"} for k in level_keys},
+                        "required": level_keys,
+                        "additionalProperties": False,
                     },
                     "legend": {
                         "type": "object",
-                        "propertyNames": {"enum": level_keys},
-                        "additionalProperties": {"type": "string"},
+                        "description": "each score level index mapped to its description",
+                        "properties": {k: {"type": "string"} for k in level_keys},
+                        "required": level_keys,
+                        "additionalProperties": False,
                     },
                     "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                 },
-                "required": ["score", "probabilities", "legend", "confidence"],
+                "required": ["type", "score", "probabilities", "legend", "confidence"],
                 "additionalProperties": False,
             }
         else:
             answer = {
                 "type": "object",
                 "properties": {
-                    "type": {"const": "noul"},
+                    "type": {"type": "string", "enum": ["noul"]},
                     "noul": {"type": "number", "minimum": 0, "maximum": 1},
                 },
-                "required": ["noul"],
+                "required": ["type", "noul"],
                 "additionalProperties": False,
             }
         properties[qid] = answer
@@ -133,6 +151,7 @@ class LLMAdapterClient:
         base_url=None,
         api_key=None,
         structured_outputs=None,
+        protocol="chat",
         llm_answer_mode="probabilities",
         normalize_probabilities=True,
         n_retry_malformed_structure=1,
@@ -143,6 +162,7 @@ class LLMAdapterClient:
         self.base_url = (base_url or config.LLM_BASE_URL).rstrip("/")
         self.api_key = api_key or config.OPENROUTER_API_KEY or config.OPENAI_API_KEY
         self.structured_outputs = structured_outputs
+        self.protocol = protocol
         self.llm_answer_mode = llm_answer_mode
         self.normalize_probabilities = normalize_probabilities
         self.n_retry_malformed_structure = n_retry_malformed_structure
@@ -162,6 +182,11 @@ class LLMAdapterClient:
     def evaluate(self, state, questions, label=None, call_seed=0):
         if not self.api_key:
             raise RuntimeError("OPENROUTER_API_KEY / OPENAI_API_KEY is not set; run in mock mode or export the key")
+        if self.protocol == "responses":
+            return self._evaluate_responses(state, questions)
+        return self._evaluate_chat(state, questions)
+
+    def _prepare(self, state, questions):
         schema = build_schema(questions)
         system = build_system_prompt()
         state_json = state if isinstance(state, str) else json.dumps(state)
@@ -185,6 +210,27 @@ class LLMAdapterClient:
                 "content": json.dumps({"state": state_json, "questions": encoded_questions}),
             },
         ]
+        return schema, messages
+
+    def _structured_mode(self):
+        mode = self.structured_outputs
+        if mode is None:
+            mode = config.LLM_STRUCTURED_OUTPUTS
+        if isinstance(mode, bool):
+            mode = "json_schema" if mode else "json_object"
+        return mode
+
+    def _http_headers(self):
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": config.LLM_USER_AGENT,
+        }
+        headers.update(config.LLM_EXTRA_HEADERS)
+        return headers
+
+    def _evaluate_chat(self, state, questions):
+        schema, messages = self._prepare(state, questions)
         total_retries = 0
         malformed = 0
         input_tokens = 0
@@ -194,11 +240,7 @@ class LLMAdapterClient:
             if attempt:
                 total_retries += 1
             response_format = None
-            mode = self.structured_outputs
-            if mode is None:
-                mode = config.LLM_STRUCTURED_OUTPUTS
-            if isinstance(mode, bool):
-                mode = "json_schema" if mode else "json_object"
+            mode = self._structured_mode()
             if mode == "json_schema":
                 response_format = {
                     "type": "json_schema",
@@ -212,15 +254,9 @@ class LLMAdapterClient:
                 "temperature": 0.0,
                 "response_format": response_format,
             }
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "User-Agent": config.LLM_USER_AGENT,
-            }
-            headers.update(config.LLM_EXTRA_HEADERS)
             if self.model.startswith(("o1", "o3", "o4", "gpt-5")):
                 payload.pop("temperature", None)
-            resp = requests.post(f"{self.base_url}/chat/completions", json=payload, headers=headers, timeout=self.timeout)
+            resp = requests.post(f"{self.base_url}/chat/completions", json=payload, headers=self._http_headers(), timeout=self.timeout)
             if resp.status_code >= 400:
                 if resp.status_code in (429, 502, 503, 504) and attempt < self.max_retries:
                     time.sleep(min(2 ** attempt, 8))
@@ -249,6 +285,61 @@ class LLMAdapterClient:
         parsed = self._parse(last_data.get("choices", [{}])[0].get("message", {}).get("content", ""), questions)[0]
         if parsed is None:
             raise RuntimeError("LLM output did not validate after corrective retries")
+        return self._response(parsed, input_tokens, output_tokens, total_retries, malformed, last_data)
+
+    def _evaluate_responses(self, state, questions):
+        schema, messages = self._prepare(state, questions)
+        total_retries = 0
+        malformed = 0
+        input_tokens = 0
+        output_tokens = 0
+        last_data = None
+        for attempt in range(self.max_retries + 1 + self.n_retry_malformed_structure):
+            if attempt:
+                total_retries += 1
+            text_format = None
+            mode = self._structured_mode()
+            if mode == "json_schema":
+                text_format = {"type": "json_schema", "name": "system_one_answers", "schema": schema}
+            elif mode == "json_object":
+                text_format = {"type": "json_object"}
+            payload = {"model": self.model, "input": messages}
+            if text_format:
+                payload["text"] = {"format": text_format}
+            resp = requests.post(f"{self.base_url}/responses", json=payload, headers=self._http_headers(), timeout=self.timeout)
+            if resp.status_code >= 400:
+                if resp.status_code in (429, 502, 503, 504) and attempt < self.max_retries:
+                    time.sleep(min(2 ** attempt, 8))
+                    continue
+                raise RuntimeError(f"LLM API error {resp.status_code}: {resp.text[:500]}")
+            data = resp.json()
+            usage = data.get("usage") or {}
+            input_tokens += int(usage.get("input_tokens", 0) or 0)
+            output_tokens += int(usage.get("output_tokens", 0) or 0)
+            content = _responses_text(data)
+            parsed, error = self._parse(content, questions)
+            if parsed is not None:
+                last_data = data
+                break
+            malformed += 1
+            if malformed > self.n_retry_malformed_structure:
+                last_data = data
+                break
+            messages = messages + [
+                {"role": "assistant", "content": content or "{}"},
+                {
+                    "role": "user",
+                    "content": f"The previous response was not schema-valid ({error}). Return only the JSON in the exact requested schema.",
+                },
+            ]
+        else:
+            raise RuntimeError("LLM request failed after retries")
+        parsed = self._parse(_responses_text(last_data), questions)[0]
+        if parsed is None:
+            raise RuntimeError("LLM output did not validate after corrective retries")
+        return self._response(parsed, input_tokens, output_tokens, total_retries, malformed, last_data)
+
+    def _response(self, parsed, input_tokens, output_tokens, total_retries, malformed, last_data):
         price_in, price_out = _price_for(self.model)
         cost = input_tokens * price_in / 1e6 + output_tokens * price_out / 1e6
         return ModelResponse(

@@ -29,6 +29,7 @@ pip install typesafe-sdk system-one-adapter
 | `LLM_USER_AGENT` | `User-Agent` header sent to the LLM endpoint (default `jev-benchmarks/0.1`). Some gateways require a non-generic UA. |
 | `LLM_EXTRA_HEADERS` | JSON object of extra HTTP headers for LLM calls (e.g. `{"x-opencode-session":"..."}`). |
 | `LLM_STRUCTURED_OUTPUTS` | Structured-output mode: `json_schema` (default), `json_object`, or `none`. Use `json_object` on endpoints that reject `json_schema`. |
+ | `LLM_RESPONSES_MODELS` | Space-separated model ids served via the `/responses` protocol instead of `/chat/completions` (default: `gpt-5.6-luna grok-4.6`). |
 | `PRICE_PER_MT_IN_USD` / `PRICE_PER_MT_OUT_USD` | Override approximate pricing for your LLM model. |
 
 Without keys the harness runs in **dry/mocked mode**: Jev and the reference LLM are replaced by deterministic mock models so the full pipeline (collection → metrics → report) still runs end to end. Mock output is clearly labeled and must not be read as real measurements.
@@ -49,7 +50,15 @@ export LLM_EXTRA_HEADERS='{"x-opencode-session":"jev-bench-run-1"}'
 python run_benchmark.py --mode auto
 ```
 
-Models served via Go's `/responses` endpoint (GPT 5.6 Luna, Grok 4.6) or `/messages` endpoint (Qwen, MiniMax) are not wired into this adapter yet.
+Models served via Go's `/responses` endpoint (GPT 5.6 Luna, Grok 4.6) are auto-detected on `LLM_RESPONSES_MODELS`. The `/responses` path also supports `json_schema` (Go's validator is strict: schemas must be fully typed — every nested object needs a `type`, closed `enum`s, `const` and open `propertyNames` maps are rejected, and `temperature` is not accepted), so for Luna you can keep the default structured mode:
+
+```bash
+export LLM_MODELS="gpt-5.6-luna"
+export LLM_STRUCTURED_OUTPUTS=json_schema   # or json_object
+python run_benchmark.py --mode auto
+```
+
+Models served via Go's `/messages` endpoint (Qwen, MiniMax) are not wired into this adapter yet.
 
 ## Run
 

@@ -17,6 +17,11 @@ LLM_MODELS = [
 LLM_USER_AGENT = os.environ.get("LLM_USER_AGENT", "jev-benchmarks/0.1")
 LLM_EXTRA_HEADERS = json.loads(os.environ.get("LLM_EXTRA_HEADERS", "{}"))
 LLM_STRUCTURED_OUTPUTS = os.environ.get("LLM_STRUCTURED_OUTPUTS", "json_schema").strip().lower()
+LLM_RESPONSES_MODELS = [
+    m.strip()
+    for m in os.environ.get("LLM_RESPONSES_MODELS", "gpt-5.6-luna grok-4.6").split()
+    if m.strip()
+]
 
 PRICE_PER_MT_IN_USD = float(os.environ.get("PRICE_PER_MT_IN_USD", "0.0"))
 PRICE_PER_MT_OUT_USD = float(os.environ.get("PRICE_PER_MT_OUT_USD", "0.0"))

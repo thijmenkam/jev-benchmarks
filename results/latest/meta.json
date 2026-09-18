@@ -1,13 +1,18 @@
 {
-  "run_id": "20260917T184210Z",
+  "run_id": "20260918T070719Z",
   "mode": "auto",
   "real_jev": true,
-  "real_llm": false,
+  "real_llm": true,
   "repeat": 3,
   "models": [
     {
       "name": "jev (typesafe)",
       "provider": "typesafe",
+      "real": true
+    },
+    {
+      "name": "gpt-5.6-luna",
+      "provider": "openrouter",
       "real": true
     }
   ],
@@ -17,5 +22,5 @@
     "field_extraction",
     "support_routing"
   ],
-  "created_at": "20260917T184210Z"
+  "created_at": "20260918T070719Z"
 }
