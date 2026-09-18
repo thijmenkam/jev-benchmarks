@@ -5,3 +5,4 @@ __pycache__/
 results/*
 !results/latest/
 !results/latest/*
+*.log
